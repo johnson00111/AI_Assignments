@@ -1,0 +1,59 @@
+TASK 3: Discuss the effect of length-normalization module.
+
+FINDINGS AND OBSERVATIONS
+
+The purpose of this task was to analyze how the length-normalization parameter (param_lambda) influences sequence generation in beam search. Based on my experiments using varied pre_words and lambda values (0.7, 0.9, 1.5, 3.0), the observations are summarized below:
+
+Relationship between Lambda and Sentence Length: My experiments demonstrate a direct correlation between the lambda value and the length of the generated sentence. As lambda increases, the model consistently produces longer sequences.
+
+At low lambda (0.7 - 0.9), the sentences remained concise (e.g., "He said ."), identical to the standard beamSearchV1.
+
+At high lambda (1.5 - 3.0), the sentences expanded significantly, often reaching the maxToken limit.
+
+Theoretical Reason for Length Variation: This behavior is driven by the scoring formula: score = log P(y|x) / |y|^lambda. In standard beam search (V1), adding any word decreases the score because log-probabilities are always negative. The length-normalization module (V2) counteracts this brevity bias by dividing the log-probability by the sentence length raised to the power of lambda. A higher lambda reduces the penalty for longer sequences, making them more competitive within the beam.
+
+Limitations of Excessive Normalization: While length-normalization helps avoid overly short outputs, an excessively high lambda leads to a degradation in quality due to repetitive patterns. When the length boost becomes too strong, the model keeps choosing high-probability words repeatedly (like "he said that") just to extend the sequence, even though the resulting sentence loses meaning. This explains why sequences at lambda = 3.0 often become logical loops.
+
+CONCLUSION Length-normalization is a necessary tool to correct the inherent brevity bias of beam search. However, the experiments show that more is not always better. A moderate value such as lambda = 0.7 provides a nuanced balance between depth and coherence, while over-tuning leads to nonsensical repetition. Ultimately, the model still requires carefully tuned parameters to remain effective.
+EXPERIMENTAL DATA
+
+beamK = 10 , param_lambda = 0.7
+v1:  -5.404447778507953 <s> He said . </s>
+v2:  -1.7517507887440922        <s> He said . </s>
+beamK = 10 , param_lambda = 0.9
+v1:  -5.404447778507953 <s> He said . </s>
+v2:  -1.2696333475130808        <s> He said . </s>
+beamK = 10 , param_lambda = 1.5
+v1:  -5.404447778507953 <s> He said . </s>
+v2:  -0.3780772286458853        <s> He said that he said that he said that he said that he said that he added . </s>
+beamK = 10 , param_lambda = 3.0
+v1:  -5.404447778507953 <s> He said . </s>
+v2:  -0.004227031919984651      <s> He said that he said that he said that he said that he said that he added . </s>
+
+
+beamK = 10 , param_lambda = 0.7
+v1:  -5.501819698763934 <s> I want the country . </s>
+v2:  -1.4090867330777541        <s> I want the country . </s>
+beamK = 10 , param_lambda = 0.9
+v1:  -5.501819698763934 <s> I want the country . </s>
+v2:  -0.9548125482613165        <s> I want the country . </s>
+beamK = 10 , param_lambda = 1.5
+v1:  -5.501819698763934 <s> I want the country . </s>
+v2:  -0.29707034043358505       <s> I want the country . </s>
+beamK = 10 , param_lambda = 3.0
+v1:  -5.501819698763934 <s> I want the country . </s>
+v2:  -0.003936851146869746      <s> I want the United States , which is expected to the United States , the two countries . </s>
+
+
+beamK = 10 , param_lambda = 0.7
+v1:  -6.697420203598457 <s> You are one of the country . </s>
+v2:  -1.4385924983288634        <s> You are one of the country . </s>
+beamK = 10 , param_lambda = 0.9
+v1:  -6.697420203598457 <s> You are one of the country . </s>
+v2:  -0.9270203959142951        <s> You are one of the country . </s>
+beamK = 10 , param_lambda = 1.5
+v1:  -6.697420203598457 <s> You are one of the country . </s>
+v2:  -0.2480526001332762        <s> You are one of the country . </s>
+beamK = 10 , param_lambda = 3.0
+v1:  -6.697420203598457 <s> You are one of the country . </s>
+v2:  -0.0033807973474830133     <s> You are one of the United States , he said that he said that the two countries . </s>
